@@ -10,15 +10,15 @@ app.get("/test", (req, res) => {
 
 // connect to mongodb
 mongoose
-.connect(
-  "mongodb+srv://venkiacademic:eTmTDWmNBZmJPoko@cluster0.bmzyfmd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-)
-.then(() => {
-  console.log("Connected to MongoDB!");
-})
-.catch((err) => {
-  console.log("Failed: ", err);
-});
+  .connect(
+    "mongodb+srv://venkiacademic:eTmTDWmNBZmJPoko@cluster0.bmzyfmd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+  )
+  .then(() => {
+    console.log("Connected to MongoDB!");
+  })
+  .catch((err) => {
+    console.log("Failed: ", err);
+  });
 
 // product schema
 const productSchema = new mongoose.Schema({
@@ -58,12 +58,51 @@ app.post("/api/products", async (req, res) => {
 });
 
 // get all products
-app.get("/api/products", async (req, res) => {
-  const products = await productModel.find();
-  res.send(products);
+// app.get("/api/products", async (req, res) => {
+//   const products = await productModel.find();
+//   res.send(products);
+// });
+// other way to get all products
+app.get("/api/products", async(req, res) => {
+  const products = await productModel.find({isInStock:true})
+  return res.send(products);
 });
 
+// update product
+app.put("/api/products/:id", async (req, res) => {
+  const product = await productModel.findByIdAndUpdate(
+    req.params.id,
+    {
+      product_name: req.body.product_name,
+      product_price: req.body.product_price,
+      isInStock: req.body.isInStock,
+      category: req.body.category,
+    },
+    { new: true }
+  );
+  if (!product) {
+    res.status(404).send("Product with given id is not found");
+  }
+  res.send(product);
+});
 
+// get product by id
+// app.get("/api/products/:id", async (req, res) => {
+//   const product = await productModel.findById(req.params.id);
+//   // if (!product) {
+//     // res.status(404).send("Product with given id is not found");
+//   // }
+//   res.send(product);
+// });
+
+// delete product
+app.delete("/api/products/:id", async (req, res) => {
+  const product = await productModel.findByIdAndRemove(req.params.id);
+  if (!product) {
+    res.status(404).send("Product with given id is not found");
+  }
+  res.send(product);
+});
 
 // listen to port
 const port = 3000;

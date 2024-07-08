@@ -1,7 +1,11 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const dotenv = require("dotenv");
+dotenv.config();
+
 const app = express();
 app.use(express.json());
+
 
 // test route
 app.get("/test", (req, res) => {
@@ -11,7 +15,7 @@ app.get("/test", (req, res) => {
 // connect to mongodb
 mongoose
   .connect(
-    "mongodb+srv://venkiacademic:eTmTDWmNBZmJPoko@cluster0.bmzyfmd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    process.env.MONGODB_URI,
   )
   .then(() => {
     console.log("Connected to MongoDB!");
@@ -68,6 +72,7 @@ app.get("/api/products", async(req, res) => {
   return res.send(products);
 });
 
+
 // update product
 app.put("/api/products/:id", async (req, res) => {
   const product = await productModel.findByIdAndUpdate(
@@ -83,21 +88,31 @@ app.put("/api/products/:id", async (req, res) => {
   if (!product) {
     res.status(404).send("Product with given id is not found");
   }
+  console.log(product);
   res.send(product);
 });
 
+
 // get product by id
-// app.get("/api/products/:id", async (req, res) => {
-//   const product = await productModel.findById(req.params.id);
-//   // if (!product) {
-//     // res.status(404).send("Product with given id is not found");
-//   // }
-//   res.send(product);
-// });
+app.get("/api/products/:id", async (req, res) => {
+  const product = await productModel.findById(req.params.id);
+  // if (!product) {
+    // res.status(404).send("Product with given id is not found");
+  // }
+  res.send(product);
+});
 
 // delete product
+// app.delete("/api/products/:id", async (req, res) => {
+//   const product = await productModel.findByIdAndRemove(req.params.id);
+//   if (!product) {
+//     res.status(404).send("Product with given id is not found");
+//   }
+//   res.send(product);
+// });
+// other way to delete product
 app.delete("/api/products/:id", async (req, res) => {
-  const product = await productModel.findByIdAndRemove(req.params.id);
+  const product = await productModel.findByIdAndDelete(req.params.id);
   if (!product) {
     res.status(404).send("Product with given id is not found");
   }
